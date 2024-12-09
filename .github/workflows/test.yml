@@ -1,0 +1,54 @@
+name: Python Script Workflow
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  run-python-script:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+
+      - name: Run Python script
+        run: python python.py
+
+      - name: Make the directory
+        run: mkdir -p /home/runner/work/MFE2/MFE2/intermediate
+
+      - name: Set up Git
+        run: |
+          git config --global user.name "mamoanwar97-procore"
+          git config --global user.email "mahmoud.m.anwar@procore.com"
+
+      - name: Checkout out intermediate repo
+        uses: actions/checkout@v3
+        with:
+          repository: "mamoanwar97-procore/Intermediate"
+          token: ${{ secrets.INTERMEDIATE_TOKEN }}
+          path: intermediate
+
+      - name: Commit updated translations to intermediate repo
+        run: |
+          cd /home/runner/work/MFE2/MFE2/intermediate
+          if git show-ref --verify --quiet refs/heads/update-translations-mfe2; then
+            git checkout update-translations-mfe2
+          else
+            git checkout -b update-translations-mfe2
+          fi
+          cp -r /home/runner/work/MFE2/MFE2/translations /home/runner/work/MFE2/MFE2/intermediate/MFE2
+          if [ -n "$(git status --porcelain)" ]; then
+            git add .
+            git commit -m "Update translations 🎉"
+            git push origin update-translations-mfe2 --force
+          else
+            echo "No changes to commit"
+          fi
