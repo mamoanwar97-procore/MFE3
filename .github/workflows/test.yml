@@ -22,7 +22,7 @@ jobs:
         run: python python.py
 
       - name: Make the directory
-        run: mkdir -p /home/runner/work/MFE2/MFE2/intermediate
+        run: mkdir -p /home/runner/work/MFE3/MFE3/intermediate
 
       - name: Set up Git
         run: |
@@ -38,17 +38,17 @@ jobs:
 
       - name: Commit updated translations to intermediate repo
         run: |
-          cd /home/runner/work/MFE2/MFE2/intermediate
-          if git show-ref --verify --quiet refs/heads/update-translations-mfe2; then
-            git checkout update-translations-mfe2
+          cd /home/runner/work/MFE3/MFE3/intermediate
+          if git show-ref --verify --quiet refs/heads/update-translations-mfe3; then
+            git checkout update-translations-mfe3
           else
-            git checkout -b update-translations-mfe2
+            git checkout -b update-translations-mfe3
           fi
-          cp -r /home/runner/work/MFE2/MFE2/translations /home/runner/work/MFE2/MFE2/intermediate/MFE2
+          cp -r /home/runner/work/MFE3/MFE3/translations /home/runner/work/MFE3/MFE3/intermediate/MFE3
           if [ -n "$(git status --porcelain)" ]; then
             git add .
             git commit -m "Update translations 🎉"
-            git push origin update-translations-mfe2 --force
+            git push origin update-translations-mfe3 --force
           else
             echo "No changes to commit"
           fi
