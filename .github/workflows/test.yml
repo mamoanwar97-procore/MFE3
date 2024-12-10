@@ -1,4 +1,4 @@
-name: Checkout or Create Branch
+name: Python Script Workflow
 
 on:
   push:
@@ -6,37 +6,16 @@ on:
       - master
 
 jobs:
-  checkout-or-create-branch:
+  run-python-script:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout main repository
-        uses: actions/checkout@v3
-
-      - name: Setup Git
+      - name: Set up Git
         run: |
           git config --global user.name "mamoanwar97-procore"
           git config --global user.email "mahmoud.m.anwar@procore.com"
 
-      - name: Checkout intermediate repository
-        uses: actions/checkout@v3
-        with:
-          repository: "mamoanwar97-procore/Intermediate"
-          token: ${{ secrets.INTERMEDIATE_TOKEN }}
-          path: intermediate
-
-      - name: Check if branch exists and create if it doesn't
+      - name: Checkout out intermediate repo
+        if: git ls-remote --exit-code --heads https://github.com/mamoanwar97-procore/Intermediate.git update-translations-mfe3
         run: |
-          cd intermediate
-          BRANCH_NAME="MFE_en"
-          if git show-ref --quiet refs/heads/$BRANCH_NAME; then
-            echo "Branch $BRANCH_NAME exists. Checking out."
-            git checkout $BRANCH_NAME
-          else
-            echo "Branch $BRANCH_NAME does not exist. Creating and checking out."
-            git checkout -b $BRANCH_NAME
-          fi
-
-      - name: Perform other actions
-        run: |
-          echo "Your subsequent steps go here."
+            echo "Branch exists, checking out"
