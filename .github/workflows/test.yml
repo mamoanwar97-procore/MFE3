@@ -13,6 +13,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Collect PR INFO
+        run: 
+          PR_TITLE="${{ github.event.pull_request.title }}"
+          echo "$PR_TITLE"
+
       - name: Checkout code
         uses: actions/checkout@v3
 
@@ -39,13 +44,10 @@ jobs:
           token: ${{ secrets.INTERMEDIATE_TOKEN }}
           path: intermediate
           ref: MFE_en
-      
-      - name: Collect PR INFO
-        run: 
-          PR_TITLE="${{ github.event.pull_request.title }}"
-          echo "PR_TITLE=$(PR_TITLE)" >> $GITHUB_ENV
-          echo "PR_TITLE=$(PR_TITLE)"
 
+      - name: Collect PR INFO
+        run: |
+          
       - name: Commit updated translations to intermediate repo
         run: |
           cd /home/runner/work/MFE3/MFE3/intermediate
@@ -54,6 +56,9 @@ jobs:
           else
             git checkout -b update-translations-mfe3
           fi
+          echo "  - repo_name: ${{ github.repository }}" >> /home/runner/work/MFE3/MFE3/intermediate/pr_info.yml
+          echo "    pr_name: ${{ github.event.pull_request.title }}" >> /home/runner/work/MFE3/MFE3/intermediate/pr_info.yml
+          echo "    pr_number: ${{ github.event.pull_request.number }}" >> /home/runner/work/MFE3/MFE3/intermediate/pr_info.yml
           mkdir -p /home/runner/work/MFE3/MFE3/intermediate/MFE3
           cp -r /home/runner/work/MFE3/MFE3/translations /home/runner/work/MFE3/MFE3/intermediate/MFE3
           if [ -n "$(git status --porcelain)" ]; then
