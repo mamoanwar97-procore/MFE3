@@ -33,6 +33,7 @@ jobs:
           
       - name: Commit updated translations to intermediate repo
         run: |
+          cd /home/runner/work/MFE3/MFE3/intermediate
           git branch -a
           if [ -n "$(git status --porcelain)" ]; then
             echo "Hi"
