@@ -57,9 +57,9 @@ jobs:
             git checkout -b update-translations-mfe3
           fi
           REPO_NAME=$(echo "${{ github.repository }}" | cut -d'/' -f2)
-          echo "  - repo_name: $REPO_NAME" >> /home/runner/work/MFE3/MFE3/intermediate/pr_info.yml
-          echo "    pr_name: ${{ github.event.pull_request.title }}" >> /home/runner/work/MFE3/MFE3/intermediate/pr_info.yml
-          echo "    pr_number: ${{ github.event.pull_request.number }}" >> /home/runner/work/MFE3/MFE3/intermediate/pr_info.yml
+          echo -e "  - repo_name: \"$REPO_NAME\"" >> /home/runner/work/MFE3/MFE3/intermediate/pr_info.yml
+          echo -e "    pr_name: \"${{ github.event.pull_request.title }}\"" >> /home/runner/work/MFE3/MFE3/intermediate/pr_info.yml
+          echo -e "    pr_number: ${{ github.event.pull_request.number }}" >> /home/runner/work/MFE3/MFE3/intermediate/pr_info.yml
           mkdir -p /home/runner/work/MFE3/MFE3/intermediate/MFE3
           cp -r /home/runner/work/MFE3/MFE3/translations /home/runner/work/MFE3/MFE3/intermediate/MFE3
           if [ -n "$(git status --porcelain)" ]; then
