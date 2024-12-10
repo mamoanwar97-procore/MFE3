@@ -1,11 +1,9 @@
 name: Python Script Workflow
 
 on:
-  pull_request:
+  push:
     branches:
       - master
-    types:
-      - closed
 
 jobs:
   run-python-script:
