@@ -1,4 +1,4 @@
-name: Python Script Workflow
+name: Checkout or Create Branch
 
 on:
   push:
@@ -6,37 +6,37 @@ on:
       - master
 
 jobs:
-  run-python-script:
+  checkout-or-create-branch:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
+      - name: Checkout main repository
         uses: actions/checkout@v3
 
-      - name: Make the directory
-        run: mkdir -p /home/runner/work/MFE3/MFE3/intermediate
-
-      - name: Set up Git
+      - name: Setup Git
         run: |
           git config --global user.name "mamoanwar97-procore"
           git config --global user.email "mahmoud.m.anwar@procore.com"
 
-      - name: Checkout out intermediate repo
+      - name: Checkout intermediate repository
+        uses: actions/checkout@v3
+        with:
+          repository: "mamoanwar97-procore/Intermediate"
+          token: ${{ secrets.INTERMEDIATE_TOKEN }}
+          path: intermediate
+
+      - name: Check if branch exists and create if it doesn't
         run: |
-          if git ls-remote --exit-code --heads https://github.com/mamoanwar97-procore/Intermediate.git update-translations-mfe3; then
-            echo "Branch exists, checking out"
-            git clone --branch update-translations-mfe3 https://github.com/mamoanwar97-procore/Intermediate.git intermediate
+          cd intermediate
+          BRANCH_NAME="MFE_en"
+          if git show-ref --quiet refs/heads/$BRANCH_NAME; then
+            echo "Branch $BRANCH_NAME exists. Checking out."
+            git checkout $BRANCH_NAME
           else
-            echo "Branch does not exist, skipping checkout"
-            git clone --branch MFE_en https://github.com/mamoanwar97-procore/Intermediate.git intermediate
+            echo "Branch $BRANCH_NAME does not exist. Creating and checking out."
+            git checkout -b $BRANCH_NAME
           fi
-          
-      - name: Commit updated translations to intermediate repo
+
+      - name: Perform other actions
         run: |
-          cd /home/runner/work/MFE3/MFE3/intermediate
-          git branch -a
-          if [ -n "$(git status --porcelain)" ]; then
-            echo "Hi"
-          else
-            echo "No changes to commit"
-          fi
+          echo "Your subsequent steps go here."
