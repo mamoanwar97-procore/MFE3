@@ -39,6 +39,7 @@ jobs:
       - name: Commit updated translations to intermediate repo
         run: |
           cd /home/runner/work/MFE3/MFE3/intermediate
+          git checkout MFE_en
           if git show-ref --verify --quiet refs/heads/update-translations-mfe3; then
             git checkout update-translations-mfe3
           else
