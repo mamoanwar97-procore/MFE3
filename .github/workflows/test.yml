@@ -1,15 +1,37 @@
 name: Python Script Workflow
 
 on:
-  push:
+  pull_request:
     branches:
       - master
+    types:
+      - closed
 
 jobs:
   run-python-script:
+    if: github.event.pull_request.merged == true
     runs-on: ubuntu-latest
 
     steps:
+      - name: Collect PR INFO
+        run:
+          PR_TITLE="${{ github.event.pull_request.title }}"
+          echo "$PR_TITLE"
+
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+
+      - name: Run Python script
+        run: python python.py
+
+      - name: Make the directory
+        run: mkdir -p /home/runner/work/MFE3/MFE3/intermediate
+
       - name: Set up Git
         run: |
           git config --global user.name "mamoanwar97-procore"
@@ -42,6 +64,21 @@ jobs:
           path: intermediate
           ref: MFE_en
 
-      - name: Where we are
-        run: git branch -a
-          
+      - name: Commit updated translations to intermediate repo
+        run: |
+          cd /home/runner/work/MFE3/MFE3/intermediate
+          mkdir -p /home/runner/work/MFE3/MFE3/intermediate/MFE3
+          cp -r /home/runner/work/MFE3/MFE3/translations /home/runner/work/MFE3/MFE3/intermediate/MFE3
+          if [ -n "$(git status --porcelain)" ]; then
+            touch temp.yml  # Create temp.yml if it doesn't exist
+            cat /home/runner/work/MFE3/MFE3/intermediate/pr_info.yml
+            cat /home/runner/work/MFE3/MFE3/intermediate/pr_info.yml >> temp.yml
+            REPO_NAME=$(echo "${{ github.repository }}" | cut -d'/' -f2)
+            echo -e "\n  - repo_name: \"$REPO_NAME\"\n    pr_name: \"${{ github.event.pull_request.title }}\"\n    pr_number: ${{ github.event.pull_request.number }}" >> temp.yml
+            mv temp.yml /home/runner/work/MFE3/MFE3/intermediate/pr_info.yml
+            git add .
+            git commit -m "Update translations 🎉"
+            git push origin update-translations-mfe3 --force
+          else
+            echo "No changes to commit"
+          fi
