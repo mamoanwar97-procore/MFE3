@@ -56,12 +56,15 @@ jobs:
           mkdir -p /home/runner/work/MFE3/MFE3/intermediate/MFE3
           cp -r /home/runner/work/MFE3/MFE3/translations /home/runner/work/MFE3/MFE3/intermediate/MFE3
           if [ -n "$(git status --porcelain)" ]; then
-            cat /home/runner/work/MFE3/MFE3/intermediate/pr_info.yml >> temp.yml
+            cat /home/runner/work/MFE3/MFE3/intermediate/pr_info.yml >> ./temp.yml
+            cat ./temp.yml
             REPO_NAME=$(echo "${{ github.repository }}" | cut -d'/' -f2)
-            echo -e "  - repo_name: \"$REPO_NAME\"" >> temp.yml
-            echo -e "    pr_name: \"${{ github.event.pull_request.title }}\"" >> temp.yml
-            echo -e "    pr_number: ${{ github.event.pull_request.number }}" >> temp.yml
-            mv temp.yml /home/runner/work/MFE3/MFE3/intermediate/pr_info.yml
+            echo -e "  - repo_name: \"$REPO_NAME\"" >> ./temp.yml
+            echo -e "    pr_name: \"${{ github.event.pull_request.title }}\"" >> ./temp.yml
+            echo -e "    pr_number: ${{ github.event.pull_request.number }}" >> ./temp.yml
+            mv ./temp.yml /home/runner/work/MFE3/MFE3/intermediate/pr_info.yml
+            cat ./temp.yml
+            cat /home/runner/work/MFE3/MFE3/intermediate/pr_info.yml
             git add .
             git commit -m "Update translations 🎉"
             git push origin update-translations-mfe3 --force
