@@ -48,6 +48,7 @@ jobs:
           else
             git checkout -b update-translations-mfe3
           fi
+          mkdir -p /home/runner/work/MFE3/MFE3/intermediate/MFE3
           cp -r /home/runner/work/MFE3/MFE3/translations /home/runner/work/MFE3/MFE3/intermediate/MFE3
           if [ -n "$(git status --porcelain)" ]; then
             git add .
