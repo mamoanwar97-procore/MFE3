@@ -74,7 +74,7 @@ jobs:
             cat /home/runner/work/MFE3/MFE3/intermediate/pr_info.yml
             cat /home/runner/work/MFE3/MFE3/intermediate/pr_info.yml >> temp.yml
             REPO_NAME=$(echo "${{ github.repository }}" | cut -d'/' -f2)
-            echo -e "\n  - repo_name: \"$REPO_NAME\"\n    pr_name: \"${{ github.event.pull_request.title }}\"\n    pr_number: ${{ github.event.pull_request.number }}" >> temp.yml
+            echo -e "  - repo_name: \"$REPO_NAME\"\n    pr_name: \"${{ github.event.pull_request.title }}\"\n    pr_number: ${{ github.event.pull_request.number }}" >> temp.yml
             mv temp.yml /home/runner/work/MFE3/MFE3/intermediate/pr_info.yml
             git add .
             git commit -m "Update translations 🎉"
