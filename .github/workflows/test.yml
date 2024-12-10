@@ -5,61 +5,14 @@ on:
     branches:
       - master
     types:
-      - closed
+      - opened
 
 jobs:
   run-python-script:
-    if: github.event.pull_request.merged == true
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.10"
-
-      - name: Run Python script
-        run: python python.py
-
-      - name: Make the directory
-        run: mkdir -p /home/runner/work/MFE3/MFE3/intermediate
-
-      - name: Set up Git
-        run: |
-          git config --global user.name "mamoanwar97-procore"
-          git config --global user.email "mahmoud.m.anwar@procore.com"
-
-      - name: Checkout out intermediate repo
-        uses: actions/checkout@v3
-        with:
-          repository: "mamoanwar97-procore/Intermediate"
-          token: ${{ secrets.INTERMEDIATE_TOKEN }}
-          path: intermediate
-          ref: MFE_en
-      
       - name: Collect PR INFO
         run: 
           PR_TITLE="${{ github.event.pull_request.title }}"
-          echo "PR_TITLE=$(PR_TITLE)" >> $GITHUB_ENV
-          echo "PR_TITLE=$(PR_TITLE)"
-
-      - name: Commit updated translations to intermediate repo
-        run: |
-          cd /home/runner/work/MFE3/MFE3/intermediate
-          if git show-ref --verify --quiet refs/heads/update-translations-mfe3; then
-            git checkout update-translations-mfe3
-          else
-            git checkout -b update-translations-mfe3
-          fi
-          mkdir -p /home/runner/work/MFE3/MFE3/intermediate/MFE3
-          cp -r /home/runner/work/MFE3/MFE3/translations /home/runner/work/MFE3/MFE3/intermediate/MFE3
-          if [ -n "$(git status --porcelain)" ]; then
-            git add .
-            git commit -m "Update translations 🎉"
-            git push origin update-translations-mfe3 --force
-          else
-            echo "No changes to commit"
-          fi
+          echo "$PR_TITLE"
