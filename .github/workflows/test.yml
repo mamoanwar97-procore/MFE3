@@ -36,6 +36,9 @@ jobs:
           token: ${{ secrets.INTERMEDIATE_TOKEN }}
           path: intermediate
           ref: MFE_en
+      
+      - name: List directory contents
+        run: ls -la
 
       - name: Commit updated translations to intermediate repo
         run: |
