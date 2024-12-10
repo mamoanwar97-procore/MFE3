@@ -17,6 +17,9 @@ jobs:
         id: default_repo
         run: |
           echo "::set-output name=repo_name::MFE3"
+          echo "::set-output name=target_branch::mfe-translations-collection"
+          echo "::set-output name=base_target_branch::MFE_en"
+          echo "::set-output name=tareget_repo::Intermediate"
         
       - name: Collect PR INFO
         run:
@@ -38,7 +41,7 @@ jobs:
         run: python python.py
 
       - name: Make the directory
-        run: mkdir -p /home/runner/work/${{ steps.default_repo.outputs.repo_name }}/${{ steps.default_repo.outputs.repo_name }}/intermediate
+        run: mkdir -p /home/runner/work/${{ steps.default_repo.outputs.repo_name }}/${{ steps.default_repo.outputs.repo_name }}/${{ steps.default_repo.outputs.tareget_repo }}
 
       - name: Set up Git
         run: |
@@ -48,49 +51,49 @@ jobs:
       - name: Check if branch exists
         id: check_branch
         run: |
-          if git ls-remote --exit-code --heads https://github.com/mamoanwar97-procore/Intermediate.git mfe-translations-collection; then
+          if git ls-remote --exit-code --heads https://github.com/mamoanwar97-procore/${{ steps.default_repo.outputs.tareget_repo }}.git ${{ steps.default_repo.outputs.target_branch }}; then
             echo "::set-output name=branch_exists::true"
           else
             echo "::set-output name=branch_exists::false"
           fi
 
-      - name: Checkout intermediate repo if branch exists
+      - name: Checkout ${{ steps.default_repo.outputs.tareget_repo }} repo if branch exists
         if: steps.check_branch.outputs.branch_exists == 'true'
         uses: actions/checkout@v3
         with:
-          repository: "mamoanwar97-procore/Intermediate"
+          repository: "mamoanwar97-procore/${{ steps.default_repo.outputs.tareget_repo }}"
           token: ${{ secrets.INTERMEDIATE_TOKEN }}
-          path: intermediate
-          ref: mfe-translations-collection
+          path: ${{ steps.default_repo.outputs.tareget_repo }}
+          ref: ${{ steps.default_repo.outputs.target_branch }}
 
       - name: Create and checkout branch if it does not exist
         if: steps.check_branch.outputs.branch_exists == 'false'
         uses: actions/checkout@v3
         with:
-          repository: "mamoanwar97-procore/Intermediate"
+          repository: "mamoanwar97-procore/${{ steps.default_repo.outputs.tareget_repo }}"
           token: ${{ secrets.INTERMEDIATE_TOKEN }}
-          path: intermediate
-          ref: MFE_en
+          path: ${{ steps.default_repo.outputs.tareget_repo }}
+          ref: ${{ steps.default_repo.outputs.base_target_branch }}
 
-      - name: Commit updated translations to intermediate repo
+      - name: Commit updated translations to ${{ steps.default_repo.outputs.tareget_repo }} repo
         id: push_changes
         run: |
-          cd /home/runner/work/${{ steps.default_repo.outputs.repo_name }}/${{ steps.default_repo.outputs.repo_name }}/intermediate
+          cd /home/runner/work/${{ steps.default_repo.outputs.repo_name }}/${{ steps.default_repo.outputs.repo_name }}/${{ steps.default_repo.outputs.tareget_repo }}
           if [ "${{ steps.check_branch.outputs.branch_exists }}" == "false" ]; then
-            git checkout -b mfe-translations-collection
+            git checkout -b ${{ steps.default_repo.outputs.target_branch }}
           fi
-          mkdir -p /home/runner/work/${{ steps.default_repo.outputs.repo_name }}/${{ steps.default_repo.outputs.repo_name }}/intermediate/${{ steps.default_repo.outputs.repo_name }}
-          cp -r /home/runner/work/${{ steps.default_repo.outputs.repo_name }}/${{ steps.default_repo.outputs.repo_name }}/translations /home/runner/work/${{ steps.default_repo.outputs.repo_name }}/${{ steps.default_repo.outputs.repo_name }}/intermediate/${{ steps.default_repo.outputs.repo_name }}
+          mkdir -p /home/runner/work/${{ steps.default_repo.outputs.repo_name }}/${{ steps.default_repo.outputs.repo_name }}/${{ steps.default_repo.outputs.tareget_repo }}/${{ steps.default_repo.outputs.repo_name }}
+          cp -r /home/runner/work/${{ steps.default_repo.outputs.repo_name }}/${{ steps.default_repo.outputs.repo_name }}/translations /home/runner/work/${{ steps.default_repo.outputs.repo_name }}/${{ steps.default_repo.outputs.repo_name }}/${{ steps.default_repo.outputs.tareget_repo }}/${{ steps.default_repo.outputs.repo_name }}
           if [ -n "$(git status --porcelain)" ]; then
             touch temp.yml  # Create temp.yml if it doesn't exist
-            cat /home/runner/work/${{ steps.default_repo.outputs.repo_name }}/${{ steps.default_repo.outputs.repo_name }}/intermediate/pr_info.yml
-            cat /home/runner/work/${{ steps.default_repo.outputs.repo_name }}/${{ steps.default_repo.outputs.repo_name }}/intermediate/pr_info.yml >> temp.yml
+            cat /home/runner/work/${{ steps.default_repo.outputs.repo_name }}/${{ steps.default_repo.outputs.repo_name }}/${{ steps.default_repo.outputs.tareget_repo }}/pr_info.yml
+            cat /home/runner/work/${{ steps.default_repo.outputs.repo_name }}/${{ steps.default_repo.outputs.repo_name }}/${{ steps.default_repo.outputs.tareget_repo }}/pr_info.yml >> temp.yml
             REPO_NAME=$(echo "${{ github.repository }}" | cut -d'/' -f2)
             echo -e "  - repo_name: \"$REPO_NAME\"\n    pr_name: \"${{ github.event.pull_request.title }}\"\n    pr_number: ${{ github.event.pull_request.number }}" >> temp.yml
-            mv temp.yml /home/runner/work/${{ steps.default_repo.outputs.repo_name }}/${{ steps.default_repo.outputs.repo_name }}/intermediate/pr_info.yml
+            mv temp.yml /home/runner/work/${{ steps.default_repo.outputs.repo_name }}/${{ steps.default_repo.outputs.repo_name }}/${{ steps.default_repo.outputs.tareget_repo }}/pr_info.yml
             git add .
             git commit -m "Update translations 🎉"
-            git push origin mfe-translations-collection --force
+            git push origin ${{ steps.default_repo.outputs.target_branch }} --force
             echo "::set-output name=new_changes::true"
           else
             echo "No changes to commit"
@@ -101,7 +104,7 @@ jobs:
         env: 
           GH_TOKEN: ${{ secrets.INTERMEDIATE_TOKEN }}
         run: |
-          PR_EXISTS=$(gh pr list --repo mamoanwar97-procore/Intermediate --head mfe-translations-collection --state open --json number --jq '.[].number')
+          PR_EXISTS=$(gh pr list --repo mamoanwar97-procore/${{ steps.default_repo.outputs.tareget_repo }} --head ${{ steps.default_repo.outputs.target_branch }} --state open --json number --jq '.[].number')
           if [ -z "$PR_EXISTS" ]; then
             echo "::set-output name=pr_exists::false"
           else
@@ -113,7 +116,7 @@ jobs:
         uses: rematocorp/open-pull-request-action@v1
         with:
           github-token: ${{ secrets.INTERMEDIATE_TOKEN }}
-          from-branch: mfe-translations-collection
-          to-branch: MFE_en
+          from-branch: ${{ steps.default_repo.outputs.target_branch }}
+          to-branch: ${{ steps.default_repo.outputs.base_target_branch }}
           repository-owner: mamoanwar97-procore
-          repository: Intermediate
+          repository: ${{ steps.default_repo.outputs.tareget_repo }}
