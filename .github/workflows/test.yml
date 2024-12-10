@@ -15,4 +15,4 @@ jobs:
       - name: Collect PR INFO
         run: 
           PR_TITLE="${{ github.event.pull_request.title }}"
-          echo "$PR_TITLE"
+          echo "PR_TITLE=$PR_TITLE"
