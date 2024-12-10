@@ -37,8 +37,11 @@ jobs:
           path: intermediate
           ref: MFE_en
       
-      - name: List directory contents
-        run: ls -la
+      - name: Collect PR INFO
+        run: 
+          PR_TITLE="${{ github.event.pull_request.title }}"
+          echo "PR_TITLE=$(PR_TITLE)" >> $GITHUB_ENV
+          echo "PR_TITLE=$(PR_TITLE)"
 
       - name: Commit updated translations to intermediate repo
         run: |
