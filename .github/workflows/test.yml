@@ -20,6 +20,9 @@ jobs:
 
       - name: Checkout code
         uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.INTERMEDIATE_TOKEN }}
+          fetch-depth: 0
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -65,6 +68,7 @@ jobs:
           ref: MFE_en
 
       - name: Commit updated translations to intermediate repo
+        id: push_changes
         run: |
           cd /home/runner/work/MFE3/MFE3/intermediate
           mkdir -p /home/runner/work/MFE3/MFE3/intermediate/MFE3
@@ -74,11 +78,34 @@ jobs:
             cat /home/runner/work/MFE3/MFE3/intermediate/pr_info.yml
             cat /home/runner/work/MFE3/MFE3/intermediate/pr_info.yml >> temp.yml
             REPO_NAME=$(echo "${{ github.repository }}" | cut -d'/' -f2)
-            echo -e "  - repo_name: \"$REPO_NAME\"\n    pr_name: \"${{ github.event.pull_request.title }}\"\n    pr_number: ${{ github.event.pull_request.number }}" >> temp.yml
+            echo -e "\n  - repo_name: \"$REPO_NAME\"\n    pr_name: \"${{ github.event.pull_request.title }}\"\n    pr_number: ${{ github.event.pull_request.number }}" >> temp.yml
             mv temp.yml /home/runner/work/MFE3/MFE3/intermediate/pr_info.yml
             git add .
             git commit -m "Update translations 🎉"
             git push origin mfe-translations-collection --force
+            echo "::set-output name=new_changes::true"
           else
             echo "No changes to commit"
           fi
+    
+      - name: Check for existing PR
+        id: check_pr
+        env: 
+          GH_TOKEN: ${{ secrets.INTERMEDIATE_TOKEN }}
+        run: |
+          PR_EXISTS=$(gh pr list --repo mamoanwar97-procore/Intermediate --head mfe-translations-collection --state open --json number --jq '.[].number')
+          if [ -z "$PR_EXISTS" ]; then
+            echo "::set-output name=pr_exists::false"
+          else
+            echo "::set-output name=pr_exists::true"
+          fi
+
+      - name: Open PR
+        if: steps.push_changes.outputs.new_changes == 'true' && steps.check_pr.outputs.pr_exists == 'false'
+        uses: rematocorp/open-pull-request-action@v1
+        with:
+          github-token: ${{ secrets.INTERMEDIATE_TOKEN }}
+          from-branch: mfe-translations-collection
+          to-branch: MFE_en
+          repository-owner: mamoanwar97-procore
+          repository: Intermediate
