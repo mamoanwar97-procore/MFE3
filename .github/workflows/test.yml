@@ -40,7 +40,7 @@ jobs:
       - name: Check if branch exists
         id: check_branch
         run: |
-          if git ls-remote --exit-code --heads https://github.com/mamoanwar97-procore/Intermediate.git update-translations-mfe3; then
+          if git ls-remote --exit-code --heads https://github.com/mamoanwar97-procore/Intermediate.git mfe-translations-collection; then
             echo "::set-output name=branch_exists::true"
           else
             echo "::set-output name=branch_exists::false"
@@ -53,7 +53,7 @@ jobs:
           repository: "mamoanwar97-procore/Intermediate"
           token: ${{ secrets.INTERMEDIATE_TOKEN }}
           path: intermediate
-          ref: update-translations-mfe3
+          ref: mfe-translations-collection
 
       - name: Create and checkout branch if it does not exist
         if: steps.check_branch.outputs.branch_exists == 'false'
@@ -78,7 +78,7 @@ jobs:
             mv temp.yml /home/runner/work/MFE3/MFE3/intermediate/pr_info.yml
             git add .
             git commit -m "Update translations 🎉"
-            git push origin update-translations-mfe3 --force
+            git push origin mfe-translations-collection --force
           else
             echo "No changes to commit"
           fi
