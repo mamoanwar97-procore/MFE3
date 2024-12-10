@@ -59,9 +59,7 @@ jobs:
             touch temp.yml  # Create temp.yml if it doesn't exist
             cat /home/runner/work/MFE3/MFE3/intermediate/pr_info.yml >> temp.yml
             REPO_NAME=$(echo "${{ github.repository }}" | cut -d'/' -f2)
-            echo -e "  - repo_name: \"$REPO_NAME\"" >> temp.yml
-            echo -e "    pr_name: \"${{ github.event.pull_request.title }}\"" >> temp.yml
-            echo -e "    pr_number: ${{ github.event.pull_request.number }}" >> temp.yml
+            echo -e "\n  - repo_name: \"$REPO_NAME\"\n    pr_name: \"${{ github.event.pull_request.title }}\"\n    pr_number: ${{ github.event.pull_request.number }}" >> temp.yml
             mv temp.yml /home/runner/work/MFE3/MFE3/intermediate/pr_info.yml
             cat temp.yml
             cat /home/runner/work/MFE3/MFE3/intermediate/pr_info.yml
